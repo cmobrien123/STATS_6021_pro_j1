@@ -1,0 +1,132 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(MASS) 
+library(tidyverse)
+```
+
+```{r}
+dimonds <- read.csv("diamonds4.csv")
+dimonds
+```
+```{r}
+ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
+  geom_point()
+```
+
+
+```{r}
+ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
+  geom_point()+
+  geom_smooth(method = "lm", se=FALSE)
+```
+
+
+```{r}
+Data = dimonds
+result<-lm(price~carat, data=Data)
+yhat<-result$fitted.values
+res<-result$residuals
+Data<-data.frame(Data,yhat,res)
+
+## adding inital attributes to the Data DF
+```
+
+
+
+```{r}
+ggplot(Data, aes(x=yhat,y=res))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot")
+```
+
+```{r}
+boxcox(result, lambda = seq(0,.5,1/10))
+```
+
+
+```{r}
+### First transformation:
+
+
+##transform y and then regress ystar on x
+ystar<-log(Data$price)
+Data<-data.frame(Data,ystar)
+result.ystar<-lm(ystar~carat, data=Data)
+
+##store fitted y & residuals
+yhat2<-result.ystar$fitted.values
+res2<-result.ystar$residuals
+
+##add to data frame
+Data<-data.frame(Data,yhat2,res2)
+
+##residual plot with ystar
+ggplot(Data, aes(x=yhat2,y=res2))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot with ystar")
+
+boxcox(result.ystar)
+## acf plot
+acf(res2, main="ACF Plot of Residuals with ystar")
+## QQ plot
+qqnorm(res2)
+qqline(res2, col="red")
+
+result.ystar
+```
+
+```{r}
+### Second transformation:
+
+
+##transform y and then regress ystar on x
+xstar<-log(Data$carat)
+Data<-data.frame(Data,xstar)
+result.xstar<-lm(ystar~xstar, data=Data)
+
+##store fitted y & residuals
+yhat3<-result.xstar$fitted.values
+res3<-result.xstar$residuals
+
+##add to data frame
+Data<-data.frame(Data,yhat3,res3)
+
+##residual plot with ystar
+ggplot(Data, aes(x=yhat3,y=res3))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot with ystar")
+
+boxcox(result.xstar)
+## acf plot
+acf(res3, main="ACF Plot of Residuals with ystar")
+## QQ plot
+qqnorm(res3)
+qqline(res3, col="red")
+
+result.xstar
+```
+
+
+
+```{r}
+ggplot(data=Data, mapping = aes(x=xstar, y=ystar))+
+  geom_point()+
+  geom_smooth(method = "lm", se=FALSE)
+  
+```
+
+```{r}
+result.xstar
+```
+
+log(y) = 8.521 + 1.944 log(x)
+
+
+#
