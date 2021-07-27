@@ -14,14 +14,16 @@ dimonds
 ```
 ```{r}
 ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
-  geom_point()
+  geom_point()+
+  labs(x="Carat", y="Price", title="General Scatter Plot of Price vs Carrat")
 ```
 
 
 ```{r}
 ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
   geom_point()+
-  geom_smooth(method = "lm", se=FALSE)
+  geom_smooth(method = "lm", se=FALSE)+ 
+  labs(x="Carat", y="Price", title="General Scatter Plot of Price vs Carrat (With Regression Line)")
 ```
 
 
@@ -41,11 +43,11 @@ Data<-data.frame(Data,yhat,res)
 ggplot(Data, aes(x=yhat,y=res))+
   geom_point()+
   geom_hline(yintercept=0, color="red")+
-  labs(x="Fitted y", y="Residuals", title="Residual Plot")
+  labs(x="Fitted y", y="Residuals", title="Inital Residual Plot (No Transformations)")
 ```
 
 ```{r}
-boxcox(result, lambda = seq(0,.5,1/10))
+boxcox(result, lambda = seq(0,.5,1/10), main= "Box Cox (No Transformations")
 ```
 
 
@@ -105,7 +107,7 @@ ggplot(Data, aes(x=yhat3,y=res3))+
 
 boxcox(result.xstar)
 ## acf plot
-acf(res3, main="ACF Plot of Residuals with ystar")
+acf(res3, main="ACF Plot of Residuals with ystar and xstar")
 ## QQ plot
 qqnorm(res3)
 qqline(res3, col="red")
@@ -118,7 +120,8 @@ result.xstar
 ```{r}
 ggplot(data=Data, mapping = aes(x=xstar, y=ystar))+
   geom_point()+
-  geom_smooth(method = "lm", se=FALSE)
+  geom_smooth(method = "lm", se=FALSE)+
+  labs(title="Final Regression with xstar and ystar")
   
 ```
 
