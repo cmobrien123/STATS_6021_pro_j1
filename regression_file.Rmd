@@ -73,8 +73,9 @@ ggplot(Data, aes(x=yhat2,y=res2))+
   geom_hline(yintercept=0, color="red")+
   labs(x="Fitted y", y="Residuals", title="Residual Plot with ystar")
 
-boxcox(result.ystar)
+boxcox(result.ystar, lambda = seq(2,4,1/10))
 ## acf plot
+par(mar=c(3,3,3,0))
 acf(res2, main="ACF Plot of Residuals with ystar")
 ## QQ plot
 qqnorm(res2)
@@ -107,6 +108,7 @@ ggplot(Data, aes(x=yhat3,y=res3))+
 
 boxcox(result.xstar)
 ## acf plot
+par(mar=c(3,3,3,0))
 acf(res3, main="ACF Plot of Residuals with ystar and xstar")
 ## QQ plot
 qqnorm(res3)
@@ -130,6 +132,5 @@ result.xstar
 ```
 
 log(y) = 8.521 + 1.944 log(x)
-
 
 #
