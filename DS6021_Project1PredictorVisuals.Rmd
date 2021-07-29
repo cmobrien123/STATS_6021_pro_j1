@@ -1,0 +1,93 @@
+---
+title: "DS6021_Project1Predictors"
+author: "Ben Johann"
+date: "7/29/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+diamonds<- read.csv('diamonds4.csv',header = T)
+
+diamonds<- diamonds%>%
+  mutate(clarity = clarity%>%
+           fct_relevel(c("SI2","SI1","VS2","VS1", "VVS2", "VVS1", "IF", "FL")))
+
+diamonds<- diamonds%>%
+  mutate(cut = cut%>%
+           fct_relevel(c("Good","Very Good","Ideal")))
+```
+
+
+```{r}
+avg_c<-diamonds%>%
+  group_by(clarity)%>%
+  summarize(mean_carat= mean(carat,na.rm=TRUE))
+
+ggplot(avg_c, aes(x=clarity,y=mean_carat))+
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of clarity vs carat")
+```
+
+```{r}
+avg_col<-diamonds%>%
+  group_by(color)%>%
+  summarize(mean_carat= mean(carat,na.rm=TRUE))
+
+ggplot(avg_col, aes(x=color,y=mean_carat))+
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of color vs carat")
+```
+
+```{r}
+avg_cut<-diamonds%>%
+  group_by(cut)%>%
+  summarize(mean_carat= mean(carat,na.rm=TRUE))
+
+ggplot(avg_cut, aes(x=cut,y=mean_carat))+
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of cut vs carat")
+```
+
+```{r}
+ggplot(diamonds, aes(x=clarity,fill=cut))+
+  geom_bar(position='fill')+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of clarity vs cut")
+```
+
+```{r}
+ggplot(diamonds, aes(x=clarity,fill=color))+
+  geom_bar(position='fill')+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of clarity vs color")
+```
+
+
+
+```{r}
+ggplot(diamonds, aes(x=cut,fill=color))+
+  geom_bar(position='fill')+
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of cut vs color")
+```
+#Other than Astor Ideal (which only has 20 datapoints), good color seems to decrease as cut gets better. This corrlation could be a factor in why cut does not seem to correlate as much with price/carat.
+
+
