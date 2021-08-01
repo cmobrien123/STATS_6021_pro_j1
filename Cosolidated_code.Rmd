@@ -1,0 +1,384 @@
+---
+title: "Consolidated_Markdown of code"
+output: html_notebook
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+diamonds<-read_csv("diamonds4.csv")
+
+#Check Data Loaded Properly:
+head(diamonds)
+
+
+```
+
+Get size/shape of Data:
+
+```{r}
+nrow(diamonds)
+ncol(diamonds)
+dim(diamonds)
+
+```
+
+5 variables, and 1,214 rows
+
+Checking for NA's:
+
+```{r}
+(diamonds[!complete.cases(diamonds),])
+(diamonds[complete.cases(diamonds),])
+```
+
+
+No Na's in data-nice. 
+
+Check for levels:
+
+```{r}
+levels(diamonds$cut)
+levels(diamonds$color)
+levels(diamonds$clarity)
+```
+
+
+No levels. We'll need to add some factors to get data in order that matches the
+website, since alphabetical won't work for all data:
+
+```{r}
+diamonds<- diamonds%>%
+  mutate(cut = cut%>%
+           fct_relevel(c("Good","Very Good","Ideal","Astor Ideal")))
+
+diamonds<- diamonds%>%
+  mutate(clarity = clarity%>%
+           fct_relevel(c("SI2","SI1","VS2","VS1", "VVS2", "VVS1", "IF", "FL")))
+
+#Since R defaults to alphabetical order, we don't need to neccessarily add factors here, but doing so to flip order the same as above
+
+diamonds<- diamonds%>%
+  mutate(color = color%>%
+           fct_relevel(c("J","I","H","G", "F", "E", "D")))
+
+#Check new levels:
+
+levels(diamonds$cut)
+levels(diamonds$color)
+levels(diamonds$clarity)
+
+```
+
+
+
+To visual distributions of different parameters:
+
+
+```{r}
+ggplot(diamonds, aes(x=cut))+
+  geom_bar(fill="blue")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Distribution of Diamonds by Cut")
+
+ggplot(diamonds, aes(x=clarity))+
+  geom_bar(fill="red")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Distribution of Diamonds by Clarity")
+
+ggplot(diamonds, aes(x=color))+
+  geom_bar(fill="green")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Distribution of Diamonds by Color")
+
+```
+
+
+
+Scatter plot of Price vs Carat:
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point()+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Scatterplot of Carat against Price", 
+       x = "Carat",
+         y = "Price")
+
+```
+
+         
+Scatter plot of Price vs Carat with all parameters added:
+         
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price, color = color, size = clarity, shape = cut)) +
+  geom_point()+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Scatterplot of Price Against Carat With Other Variables", 
+       x = "Carat",
+       y = "Price (USD)")
+```
+
+
+Very Messy and not particularly useful, so let's break it down into indvidual variables:
+```{r}
+
+ggplot(data = diamonds, aes(x = carat, y = price, color = clarity))+
+  geom_point()+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Scatterplot of Price Against Carat With Clarity", 
+       x = "Carat",
+       y = "Price (USD)")
+  
+  
+ggplot(data = diamonds, aes(x = carat, y = price, color = color)) +
+  geom_point()+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Scatterplot of Price Against Carat With Color", 
+       x = "Carat",
+       y = "Price (USD)")
+  
+  
+ggplot(data = diamonds, aes(x = carat, y = price, color = cut)) +
+  geom_point()+ 
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Scatterplot of Price Against Carat With Cut", 
+                     x = "Carat",
+                     y = "Price (USD)")
+```
+
+Website Claims order of importance is: Cut, color, carat, clarity
+
+
+First: create new column "price/carat" to control for carat size as we explore how other attributes affect price
+
+
+```{r}
+diamonds<-diamonds%>%
+  mutate(PricePerCarat = price/carat)
+```
+
+
+
+Get grouped means of price per carat for each attribute:
+
+```{r}
+ClarityVSPricePerCarat<-diamonds%>%
+  group_by(clarity)%>%
+  summarize(meanPrice=mean(PricePerCarat))
+
+ColorVSPricePerCarat<-diamonds%>%
+  group_by(color)%>%
+  summarize(meanPrice=mean(PricePerCarat))
+
+CutVSPricePerCarat<-diamonds%>%
+  group_by(cut)%>%
+  summarize(meanPrice=mean(PricePerCarat))
+```
+
+
+Plots of grouped Means:
+
+```{r}
+ggplot(ClarityVSPricePerCarat, aes(x=clarity, y=meanPrice))+
+  geom_bar(stat="identity", fill = "red")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Mean Price per Carat by Clarity", 
+       x = "Clarity",
+       y = "Mean Price Per Carat")
+
+ggplot(ColorVSPricePerCarat, aes(x=color, y=meanPrice))+
+  geom_bar(stat="identity", fill = "blue")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Mean Price per Carat by Color", 
+       x = "Color",
+       y = "Mean Price Per Carat")
+
+ggplot(CutVSPricePerCarat, aes(x=cut, y=meanPrice))+
+  geom_bar(stat="identity", fill = "green")+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(title = "Mean Price per Carat by Cut",
+       x = "Cut",
+       y = "Mean Price Per Carat")
+
+```
+
+
+
+#looking at some outliers
+```{r}
+diamonds%>%
+  filter(clarity == "FL")
+
+diamonds%>%
+  filter(cut == "Ideal")
+
+diamonds%>%
+  filter(color == "H")
+```
+
+
+
+```{r}
+ggplot(diamonds, aes(x=cut,fill=color))+
+  geom_bar(position='fill')+
+  theme(axis.text.x = element_text(),
+        plot.title = element_text(hjust = 0.5))+
+  labs(title="Distribution of cut vs color")
+```
+#Other than Astor Ideal (which only has 20 datapoints), good color seems to decrease as cut gets better. This corrlation could be a factor in why cut does not seem to correlate as much with price/carat.
+
+
+
+
+
+
+# Regression Code
+
+
+
+
+
+
+
+
+```{r}
+library(MASS) 
+library(tidyverse)
+```
+
+```{r}
+dimonds <- read.csv("diamonds4.csv")
+dimonds
+```
+```{r}
+ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
+  geom_point()+
+  labs(x="Carat", y="Price", title="General Scatter Plot of Price vs Carrat")
+```
+
+
+```{r}
+ggplot(data = dimonds, mapping = aes(x=carat, y = price))+
+  geom_point()+
+  geom_smooth(method = "lm", se=FALSE)+ 
+  labs(x="Carat", y="Price", title="General Scatter Plot of Price vs Carrat (With Regression Line)")
+```
+
+
+```{r}
+Data = dimonds
+result<-lm(price~carat, data=Data)
+yhat<-result$fitted.values
+res<-result$residuals
+Data<-data.frame(Data,yhat,res)
+
+## adding inital attributes to the Data DF
+```
+
+
+
+```{r}
+ggplot(Data, aes(x=yhat,y=res))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Inital Residual Plot (No Transformations)")
+```
+
+```{r}
+boxcox(result, lambda = seq(0,.5,1/10), main= "Box Cox (No Transformations")
+```
+
+
+```{r}
+### First transformation:
+
+
+##transform y and then regress ystar on x
+ystar<-log(Data$price)
+Data<-data.frame(Data,ystar)
+result.ystar<-lm(ystar~carat, data=Data)
+
+##store fitted y & residuals
+yhat2<-result.ystar$fitted.values
+res2<-result.ystar$residuals
+
+##add to data frame
+Data<-data.frame(Data,yhat2,res2)
+
+##residual plot with ystar
+ggplot(Data, aes(x=yhat2,y=res2))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot with ystar")
+
+boxcox(result.ystar, lambda = seq(2,4,1/10))
+## acf plot
+# par(mar=c(5,5,5,0))
+# acf(res2, main="ACF Plot of Residuals with ystar")
+# ## QQ plot
+# qqnorm(res2)
+# qqline(res2, col="red")
+
+
+result.ystar
+```
+
+```{r}
+### Second transformation:
+
+
+##transform y and then regress ystar on x
+xstar<-log(Data$carat)
+Data<-data.frame(Data,xstar)
+result.xstar<-lm(ystar~xstar, data=Data)
+
+##store fitted y & residuals
+yhat3<-result.xstar$fitted.values
+res3<-result.xstar$residuals
+
+##add to data frame
+Data<-data.frame(Data,yhat3,res3)
+
+##residual plot with ystar
+ggplot(Data, aes(x=yhat3,y=res3))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot with ystar")
+
+boxcox(result.xstar)
+## acf plot
+par(mar=c(5,5,5,0))
+acf(res3, main="ACF Plot of Residuals with ystar and xstar",lag.max = 15)
+## QQ plot
+qqnorm(res3)
+qqline(res3, col="red")
+
+result.xstar
+```
+
+
+
+```{r}
+ggplot(data=Data, mapping = aes(x=xstar, y=ystar))+
+  geom_point()+
+  geom_smooth(method = "lm", se=FALSE)+
+  labs(title="Final Regression with xstar and ystar")
+  
+```
+
+```{r}
+result.xstar
+```
+
+log(y) = 8.521 + 1.944 log(x)
+
+#
