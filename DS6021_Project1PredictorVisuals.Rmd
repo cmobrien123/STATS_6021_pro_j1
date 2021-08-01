@@ -33,7 +33,7 @@ avg_c<-diamonds%>%
   summarize(mean_carat= mean(carat,na.rm=TRUE))
 
 ggplot(avg_c, aes(x=clarity,y=mean_carat))+
-  geom_bar(stat="identity")+
+  geom_bar(stat="identity", color='blue')+
   theme(axis.text.x = element_text(angle = 90),
         plot.title = element_text(hjust = 0.5))+
   labs(title="Distribution of clarity vs carat")
